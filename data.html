@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .search-container {
+            text-align: right;
+            margin-bottom: 20px;
+            margin-right: 5%;
+        }
+
+        input[type="date"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button.search-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        button.search-btn:hover {
+            background: #0056b3;
+        }
+
+        table {
+            width: 90%;
+            max-width: 1200px;
+            border-collapse: collapse;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: gold;
+            font-size: 18px;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+
+        .save-btn {
+            background: darkgreen;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: green;
+        }
+
+        .back-btn {
+            background: darkred;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .back-btn:hover {
+            background: red;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Saved Data Records</h1>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="date" id="searchDate">
+        <button class="search-btn" onclick="fetchData()">Search</button>
+    </div>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>People In</th>
+                <th>People Out</th>
+                <th>Total Inside</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here dynamically -->
+        </tbody>
+    </table>
+
+    <button class="btn save-btn" onclick="saveAsPDF()">Save as PDF</button>
+    <button class="btn back-btn" onclick="goBack()">Back</button>
+
+    <script>
+        function goBack() {
+            window.location.href = "index.html"; // Redirects to index.html
+        }
+
+        function fetchData() {
+            let dateValue = document.getElementById("searchDate").value;
+
+            let url = "http://localhost/fetch_total_data.php"; // Default URL to fetch all
+            if (dateValue) {
+                url = `http://localhost/fetch_total_data.php?date=${dateValue}`; // Add date filter
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    let tableBody = document.querySelector("#dataTable tbody");
+                    tableBody.innerHTML = ""; // Clear previous rows
+
+                    if (!Array.isArray(data) || data.length === 0) {
+                        tableBody.innerHTML = "<tr><td colspan='5'>No data available</td></tr>";
+                        return;
+                    }
+
+                    data.forEach((row) => {
+                        let newRow = `<tr>
+                            <td>${row.id}</td>
+                            <td>${row.people_in}</td>
+                            <td>${row.people_out}</td>
+                            <td>${row.total_inside}</td>
+                            <td>${row.timestamp}</td>
+                        </tr>`;
+                        tableBody.innerHTML += newRow;
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                    document.querySelector("#dataTable tbody").innerHTML =
+                        "<tr><td colspan='5' style='color: red;'>Failed to load data</td></tr>";
+                });
+        }
+
+        function saveAsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.text("Saved Data Records", 80, 15);
+
+            let rows = [];
+            document.querySelectorAll("#dataTable tbody tr").forEach(tr => {
+                let rowData = [];
+                tr.querySelectorAll("td").forEach(td => {
+                    rowData.push(td.innerText);
+                });
+                rows.push(rowData);
+            });
+
+            doc.autoTable({
+                head: [["ID", "People In", "People Out", "Total Inside", "Timestamp"]],
+                body: rows,
+                startY: 25
+            });
+
+            doc.save("Saved_Data.pdf");
+        }
+
+        // Fetch data on page load
+        fetchData();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>People Counter</title>
+    <style>
+        /* Background with blur effect */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(15px);
+            color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Title */
+        h1 {
+            font-size: 90px;
+            margin-bottom: 40px;
+        }
+
+        /* Container for IN and OUT */
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            max-width: 1500px;
+            padding: 20px;
+            gap: 50px;
+            /* Gap between boxes */
+        }
+
+        /* Box for IN and OUT */
+        .box {
+            width: 45%;
+            padding: 50px;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(25px);
+            text-align: center;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Styling for numbers and labels */
+        .count {
+            font-size: 250px;
+            font-weight: bold;
+        }
+
+        .label {
+            font-size: 100px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .in-label {
+            color: green;
+        }
+
+        .out-label {
+            color: red;
+        }
+
+        .total-label {
+            font-size: 90px;
+            font-weight: bold;
+            color: gold;
+            margin-bottom: -80px;
+        }
+
+        /* Total Box and Button Container */
+        .bottom-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 100px;
+            /* Space between button and total box */
+        }
+
+        /* Total Box */
+        .total-box {
+            padding: 70px;
+            width: 35rem;
+            height: 20rem;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(30px);
+            box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* View Data Button */
+        .view-data-btn {
+            padding: 15px 30px;
+            font-size: 24px;
+            font-weight: bold;
+            border: none;
+            border-radius: 20px;
+            margin-left: -36rem;
+            margin-right: 20rem;
+            margin-top: 22rem;
+            background: gold;
+            color: black;
+            cursor: pointer;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+            transition: 0.3s;
+        }
+
+        .view-data-btn:hover {
+            background: darkgoldenrod;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>People Counter</h1>
+
+    <!-- IN on the left and OUT on the right -->
+    <div class="container">
+        <div class="box">
+            <span id="inCount" class="count">0</span>
+            <div class="label in-label">IN</div>
+        </div>
+        <div class="box">
+            <span id="outCount" class="count">0</span>
+            <div class="label out-label">OUT</div>
+        </div>
+    </div>
+
+    <!-- TOTAL and View Data Button Container -->
+    <!-- TOTAL and View Data + Save Data Buttons -->
+    <div class="bottom-container">
+        <button class="view-data-btn" onclick="openDataPage()">View Data</button>
+
+        <div class="total-box">
+            <div class="label total-label">TOTAL</div>
+            <span id="totalCount" class="count">0</span>
+        </div>
+    </div>
+
+
+    <script>
+        function updateData() {
+            fetch("http://localhost/data.php") // Ensure correct URL
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data); // Debugging
+                    document.getElementById("inCount").innerText = data.people_in;
+                    document.getElementById("outCount").innerText = data.people_out;
+                    document.getElementById("totalCount").innerText = data.total_inside;
+                })
+                .catch(err => console.error("Error fetching data:", err));
+        }
+
+        setInterval(updateData, 200); // Refresh every second
+
+        function openDataPage() {
+            window.location.href = "data.html"; // Open in new tab
+        }
+    </script>
+
+    <style>
+        .save-data-btn {
+            background: green;
+        }
+
+        .save-data-btn:hover {
+            background: darkgreen;
+        }
+    </style>
+
+</body>
+
+</html>
